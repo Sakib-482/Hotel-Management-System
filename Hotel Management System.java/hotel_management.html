@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hotel Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0eee8;
+    --muted: #888;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --green: #4caf7d;
+    --red: #e05c5c;
+    --blue: #5b9bd5;
+    --purple: #9b7fe8;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 3rem; }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--gold2);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .header p { color: var(--muted); margin-top: 0.5rem; font-size: 14px; }
+
+  /* DOWNLOAD BUTTON */
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 1.5rem auto 0;
+    background: var(--gold);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .download-btn:hover { background: var(--gold2); transform: translateY(-2px); }
+  .download-btn svg { width: 18px; height: 18px; }
+
+  /* CONCEPT TAGS */
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem; }
+  .tag {
+    font-size: 12px; font-weight: 500; padding: 4px 14px;
+    border-radius: 50px; border: 1px solid;
+  }
+  .tag-enc { border-color: #4caf7d33; color: var(--green); background: #4caf7d11; }
+  .tag-abs { border-color: #9b7fe833; color: var(--purple); background: #9b7fe811; }
+  .tag-inh { border-color: #c9a84c33; color: var(--gold); background: #c9a84c11; }
+  .tag-pol { border-color: #5b9bd533; color: var(--blue); background: #5b9bd511; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-val { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* SECTION */
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 12px; margin-top: 2rem;
+  }
+
+  /* ROOM GRID */
+  .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .room-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1rem; cursor: default;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .room-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .room-card.booked { opacity: 0.5; }
+  .room-num { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--gold2); line-height: 1; margin: 6px 0; }
+  .room-type-badge {
+    font-size: 11px; font-weight: 500; padding: 2px 10px;
+    border-radius: 50px; display: inline-block;
+  }
+  .t-std { background: #5b9bd515; color: var(--blue); border: 1px solid #5b9bd530; }
+  .t-dlx { background: #9b7fe815; color: var(--purple); border: 1px solid #9b7fe830; }
+  .t-ste { background: #c9a84c15; color: var(--gold); border: 1px solid #c9a84c30; }
+  .room-price { font-size: 15px; font-weight: 600; margin-top: 8px; color: var(--text); }
+  .room-amenities { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-avail { background: var(--green); }
+  .dot-book { background: var(--red); }
+
+  /* FORM */
+  .form-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+  .form-group label { font-size: 12px; color: var(--muted); }
+  .form-group input, .form-group select {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+  .form-group select option { background: var(--bg3); }
+  .btn-book {
+    background: var(--gold); color: #0a0a0f;
+    border: none; border-radius: 8px; padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s, opacity 0.2s;
+  }
+  .btn-book:hover { background: var(--gold2); }
+  .btn-book:disabled { opacity: 0.4; cursor: not-allowed; }
+  .cost-preview { font-size: 13px; color: var(--muted); }
+
+  /* BOOKINGS */
+  .bookings-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .booking-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 1.25rem; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap;
+  }
+  .booking-row:last-child { border-bottom: none; }
+  .bk-id { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .bk-name { font-size: 15px; font-weight: 500; }
+  .bk-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .bk-cost { font-size: 14px; font-weight: 600; color: var(--gold2); white-space: nowrap; }
+  .btn-checkout {
+    background: transparent; color: var(--red);
+    border: 1px solid var(--red); border-radius: 8px;
+    padding: 5px 12px; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; cursor: pointer; transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-checkout:hover { background: #e05c5c18; }
+  .msg { font-size: 13px; padding: 8px 12px; border-radius: 8px; margin-top: 10px; }
+  .msg-ok { background: #4caf7d15; color: var(--green); border: 1px solid #4caf7d30; }
+  .msg-err { background: #e05c5c15; color: var(--red); border: 1px solid #e05c5c30; }
+  .empty { padding: 1.5rem 1.25rem; color: var(--muted); font-size: 14px; }
+
+  /* OOP TABLE */
+  .oop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .oop-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1rem 1.25rem;
+  }
+  .oop-label { font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+  .oop-desc { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--bg3); padding: 1px 5px; border-radius: 4px; color: var(--gold2); }
+
+  @media(max-width:600px) {
+    .stats { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Hotel Management System</h1>
+    <p>Java OOP Demo — Encapsulation · Abstraction · Inheritance · Polymorphism</p>
+    <button class="download-btn" onclick="downloadJava()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Java File
+    </button>
+  </div>
+
+  <div class="tags">
+    <span class="tag tag-enc">Encapsulation</span>
+    <span class="tag tag-abs">Abstraction</span>
+    <span class="tag tag-inh">Inheritance</span>
+    <span class="tag tag-pol">Polymorphism</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="s-total" style="color:var(--text)">5</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val" id="s-avail" style="color:var(--green)">5</div><div class="stat-lbl">Available</div></div>
+    <div class="stat"><div class="stat-val" id="s-booked" style="color:var(--red)">0</div><div class="stat-lbl">Booked</div></div>
+    <div class="stat"><div class="stat-val" id="s-rev" style="color:var(--gold2)">0</div><div class="stat-lbl">Revenue ৳</div></div>
+  </div>
+
+  <div class="section-title">Rooms</div>
+  <div class="room-grid" id="room-grid"></div>
+
+  <div class="section-title">Book a Room</div>
+  <div class="form-card">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Guest name</label>
+        <input type="text" id="guest" placeholder="e.g. Rahim Mia" />
+      </div>
+      <div class="form-group">
+        <label>Room</label>
+        <select id="room-sel"></select>
+      </div>
+      <div class="form-group" style="max-width:100px">
+        <label>Nights</label>
+        <input type="number" id="nights" value="1" min="1" max="30" />
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <button class="btn-book" id="btn-book" onclick="bookRoom()">Book Room</button>
+      <span class="cost-preview" id="cost-preview"></span>
+    </div>
+    <div id="book-msg"></div>
+  </div>
+
+  <div class="section-title">Current Bookings</div>
+  <div class="bookings-card" id="bookings-list"></div>
+
+  <div class="section-title">OOP Concepts</div>
+  <div class="oop-grid">
+    <div class="oop-card">
+      <div class="oop-label tag-enc" style="color:var(--green)">Encapsulation</div>
+      <div class="oop-desc"><code>roomNumber</code>, <code>price</code>, <code>isBooked</code> are <code>private</code>. Access via getters/setters only.</div>
+    </div>
+    <div class="oop-card">
+      <div class="oop-label" style="color:var(--purple)">Abstraction</div>
+      <div class="oop-desc"><code>Room</code> is abstract. <code>getRoomType()</code> and <code>getAmenities()</code> are abstract methods.</div>
+    </div>
+    <div class="oop-card">
+      <div class="oop-label" style="color:var(--gold)">Inheritance</div>
+      <div class="oop-desc"><code>StandardRoom</code>, <code>DeluxeRoom</code>, <code>Suite</code> all extend <code>Room</code>.</div>
+    </div>
+    <div class="oop-card">
+      <div class="oop-label" style="color:var(--blue)">Polymorphism</div>
+      <div class="oop-desc">One <code>Room[]</code> holds all types. Each overrides <code>toString()</code> differently.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ROOMS = [
+  { id:101, type:'Standard', price:2000, amenities:'WiFi, TV, AC', booked:false },
+  { id:102, type:'Standard', price:2000, amenities:'WiFi, TV, AC', booked:false },
+  { id:201, type:'Deluxe',   price:4500, amenities:'WiFi, TV, AC, Mini-Bar, Sea View', booked:false },
+  { id:202, type:'Deluxe',   price:4500, amenities:'WiFi, TV, AC, Mini-Bar, Sea View', booked:false },
+  { id:301, type:'Suite',    price:9000, amenities:'WiFi, 2 TVs, Jacuzzi, Butler, Balcony', booked:false },
+];
+let rooms = ROOMS.map(r=>({...r}));
+let bookings = [];
+let counter = 1000;
+
+function typeCls(t){ return {Standard:'t-std',Deluxe:'t-dlx',Suite:'t-ste'}[t]; }
+
+function renderRooms(){
+  document.getElementById('room-grid').innerHTML = rooms.map(r=>`
+    <div class="room-card ${r.booked?'booked':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="room-type-badge ${typeCls(r.type)}">${r.type}</span>
+        <span class="status-dot ${r.booked?'dot-book':'dot-avail'}"></span>
+      </div>
+      <div class="room-num">${r.id}</div>
+      <div class="room-price">৳${r.price.toLocaleString()}/night</div>
+      <div class="room-amenities">${r.amenities}</div>
+    </div>`).join('');
+}
+
+function renderSelect(){
+  const avail = rooms.filter(r=>!r.booked);
+  const sel = document.getElementById('room-sel');
+  sel.innerHTML = avail.length
+    ? avail.map(r=>`<option value="${r.id}">Room ${r.id} (${r.type}) — ৳${r.price.toLocaleString()}</option>`).join('')
+    : `<option value="">No rooms available</option>`;
+  document.getElementById('btn-book').disabled = !avail.length;
+  updateCost();
+}
+
+function updateCost(){
+  const rid = parseInt(document.getElementById('room-sel').value);
+  const n = parseInt(document.getElementById('nights').value)||1;
+  const r = rooms.find(x=>x.id===rid);
+  document.getElementById('cost-preview').textContent = r ? `Total: ৳${(r.price*n).toLocaleString()} BDT` : '';
+}
+
+document.getElementById('room-sel').addEventListener('change', updateCost);
+document.getElementById('nights').addEventListener('input', updateCost);
+
+function renderBookings(){
+  const el = document.getElementById('bookings-list');
+  if(!bookings.length){ el.innerHTML='<div class="empty">No active bookings.</div>'; return; }
+  el.innerHTML = bookings.map(b=>`
+    <div class="booking-row">
+      <div>
+        <div class="bk-id">#${b.id}</div>
+        <div class="bk-name">${b.guest}</div>
+        <div class="bk-detail">${b.type} Room ${b.roomId} · ${b.nights} night${b.nights>1?'s':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="bk-cost">৳${b.cost.toLocaleString()}</span>
+        <button class="btn-checkout" onclick="checkout(${b.id})">Checkout</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats(){
+  const avail = rooms.filter(r=>!r.booked).length;
+  const rev = bookings.reduce((s,b)=>s+b.cost,0);
+  document.getElementById('s-avail').textContent = avail;
+  document.getElementById('s-booked').textContent = rooms.length-avail;
+  document.getElementById('s-rev').textContent = rev.toLocaleString();
+}
+
+function bookRoom(){
+  const guest = document.getElementById('guest').value.trim();
+  const rid = parseInt(document.getElementById('room-sel').value);
+  const n = parseInt(document.getElementById('nights').value)||1;
+  const msgEl = document.getElementById('book-msg');
+  if(!guest){ msgEl.innerHTML='<div class="msg msg-err">Guest name দিন।</div>'; return; }
+  const room = rooms.find(r=>r.id===rid);
+  if(!room||room.booked){ msgEl.innerHTML='<div class="msg msg-err">Room available নেই।</div>'; return; }
+  room.booked=true;
+  const bid=++counter;
+  bookings.push({id:bid,guest,roomId:rid,type:room.type,nights:n,cost:room.price*n});
+  msgEl.innerHTML=`<div class="msg msg-ok">✓ Booking #${bid} confirmed for ${guest}!</div>`;
+  document.getElementById('guest').value='';
+  document.getElementById('nights').value=1;
+  renderRooms(); renderSelect(); renderBookings(); updateStats();
+}
+
+function checkout(bid){
+  const idx=bookings.findIndex(b=>b.id===bid);
+  if(idx===-1)return;
+  const b=bookings[idx];
+  const room=rooms.find(r=>r.id===b.roomId);
+  if(room)room.booked=false;
+  bookings.splice(idx,1);
+  document.getElementById('book-msg').innerHTML=`<div class="msg msg-ok">✓ Room ${b.roomId} checkout হয়েছে। ধন্যবাদ ${b.guest}!</div>`;
+  renderRooms(); renderSelect(); renderBookings(); updateStats();
+}
+
+const JAVA_CODE = `import java.util.*;
+
+// ABSTRACTION - Abstract class
+abstract class Room {
+    private int roomNumber;       // ENCAPSULATION
+    private double pricePerNight;
+    private boolean isBooked;
+
+    public Room(int roomNumber, double pricePerNight) {
+        this.roomNumber = roomNumber;
+        this.pricePerNight = pricePerNight;
+        this.isBooked = false;
+    }
+
+    public int getRoomNumber()        { return roomNumber; }
+    public double getPricePerNight()  { return pricePerNight; }
+    public boolean isBooked()         { return isBooked; }
+    public void setBooked(boolean b)  { this.isBooked = b; }
+
+    public abstract String getRoomType();
+    public abstract String getAmenities();
+
+    @Override
+    public String toString() {
+        return String.format("[%s] Room %d | Price: %.0f/night | %s | %s",
+                getRoomType(), roomNumber, pricePerNight,
+                isBooked ? "BOOKED" : "AVAILABLE", getAmenities());
+    }
+}
+
+// INHERITANCE
+class StandardRoom extends Room {
+    public StandardRoom(int roomNumber) { super(roomNumber, 2000); }
+    @Override public String getRoomType()   { return "Standard"; }
+    @Override public String getAmenities() { return "WiFi, TV, AC"; }
+}
+
+class DeluxeRoom extends Room {
+    public DeluxeRoom(int roomNumber) { super(roomNumber, 4500); }
+    @Override public String getRoomType()   { return "Deluxe"; }
+    @Override public String getAmenities() { return "WiFi, TV, AC, Mini-Bar, Sea View"; }
+}
+
+class Suite extends Room {
+    public Suite(int roomNumber) { super(roomNumber, 9000); }
+    @Override public String getRoomType()   { return "Suite"; }
+    @Override public String getAmenities() { return "WiFi, 2 TVs, Jacuzzi, Butler, Balcony"; }
+}
+
+class Booking {
+    private static int counter = 1000;
+    private int bookingId;
+    private String guestName;
+    private Room room;
+    private int nights;
+
+    public Booking(String guestName, Room room, int nights) {
+        this.bookingId = ++counter;
+        this.guestName = guestName;
+        this.room = room;
+        this.nights = nights;
+        room.setBooked(true);
+    }
+
+    public int getBookingId()   { return bookingId; }
+    public Room getRoom()       { return room; }
+    public double getTotalCost() { return room.getPricePerNight() * nights; }
+
+    @Override
+    public String toString() {
+        return String.format("Booking #%d | Guest: %s | %s Room %d | %d nights | Total: %.0f BDT",
+                bookingId, guestName, room.getRoomType(),
+                room.getRoomNumber(), nights, getTotalCost());
+    }
+}
+
+class Hotel {
+    private String name;
+    private List<Room> rooms = new ArrayList<>();
+    private List<Booking> bookings = new ArrayList<>();
+
+    public Hotel(String name) {
+        this.name = name;
+        rooms.add(new StandardRoom(101));
+        rooms.add(new StandardRoom(102));
+        rooms.add(new DeluxeRoom(201));
+        rooms.add(new DeluxeRoom(202));
+        rooms.add(new Suite(301));
+    }
+
+    public void showAllRooms() {
+        System.out.println("\\n===== " + name + " - All Rooms =====");
+        for (Room r : rooms) System.out.println(r); // POLYMORPHISM
+    }
+
+    public void showAvailableRooms() {
+        System.out.println("\\n===== Available Rooms =====");
+        rooms.stream().filter(r -> !r.isBooked()).forEach(System.out::println);
+    }
+
+    public void bookRoom(int roomNumber, String guest, int nights) {
+        for (Room r : rooms) {
+            if (r.getRoomNumber() == roomNumber) {
+                if (r.isBooked()) {
+                    System.out.println("Room " + roomNumber + " is already booked!");
+                } else {
+                    Booking b = new Booking(guest, r, nights);
+                    bookings.add(b);
+                    System.out.println("Booked! " + b);
+                }
+                return;
+            }
+        }
+        System.out.println("Room " + roomNumber + " not found.");
+    }
+
+    public void checkout(int bookingId) {
+        for (Booking b : bookings) {
+            if (b.getBookingId() == bookingId) {
+                b.getRoom().setBooked(false);
+                bookings.remove(b);
+                System.out.println("Checkout done. Thanks for staying at " + name + "!");
+                return;
+            }
+        }
+        System.out.println("Booking #" + bookingId + " not found.");
+    }
+
+    public void showBookings() {
+        System.out.println("\\n===== Current Bookings =====");
+        if (bookings.isEmpty()) System.out.println("No active bookings.");
+        else bookings.forEach(System.out::println);
+    }
+}
+
+public class HotelManagementSystem {
+    public static void main(String[] args) {
+        Hotel hotel = new Hotel("Dhaka Grand Hotel");
+        hotel.showAllRooms();
+        hotel.showAvailableRooms();
+
+        System.out.println("\\n===== Booking Rooms =====");
+        hotel.bookRoom(101, "Rahim Mia", 3);
+        hotel.bookRoom(201, "Karim Uddin", 2);
+        hotel.bookRoom(301, "Sara Begum", 5);
+        hotel.bookRoom(101, "New Guest", 1);
+
+        hotel.showBookings();
+        hotel.showAllRooms();
+
+        System.out.println("\\n===== Checkout =====");
+        hotel.checkout(1001);
+        hotel.showAvailableRooms();
+    }
+}`;
+
+function downloadJava(){
+  const blob = new Blob([JAVA_CODE], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'HotelManagementSystem.java';
+  a.click();
+}
+
+renderRooms(); renderSelect(); renderBookings(); updateStats();
+</script>
+</body>
+</html>
